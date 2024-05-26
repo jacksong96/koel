@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAnimals, fetchUsers } from './lib/dataFetching';
 import Image from 'next/image';
+import axios from 'axios';
+import Leaderboard from './Leaderboard';
+
 
 const HomePage: React.FC = () => {
   const [animals, setAnimals] = useState<any[]>([]);
@@ -61,6 +64,8 @@ const HomePage: React.FC = () => {
       <button onClick={fetchData} disabled={loading}>
         {loading ? 'Fetching Data...' : 'Fetch Data'}
       </button>
+      <h2>Leaderboard</h2>
+      <ul><Leaderboard /></ul>
       <h2>Animals:</h2>
       <ul>
         {animals.map(animal => (

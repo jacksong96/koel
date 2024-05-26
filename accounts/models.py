@@ -10,5 +10,13 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-    
- 
+
+
+class Leaderboard:
+    @staticmethod
+    def get_leaderboard():
+        # Annotate each user with the count of identified animals and order by this count
+        leaderboard = User.objects.annotate(
+            identified_animals_count=models.Count('identified_animals')
+        ).order_by('-identified_animals_count')
+        return leaderboard
