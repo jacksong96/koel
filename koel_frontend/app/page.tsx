@@ -5,6 +5,15 @@ import Image from 'next/image';
 import axios from 'axios';
 import Leaderboard from './Leaderboard';
 
+const initialLeaderboard = [
+  { username: 'Jackson', identified_animals_count: 10 },
+  { username: 'Ervin', identified_animals_count: 50 },
+  { username: 'Cholo', identified_animals_count: 60 },
+  { username: 'Zul', identified_animals_count: 22 },
+  { username: 'Indr', identified_animals_count: 15 },
+  { username: 'Rit', identified_animals_count: 28 },
+  // Add more users as needed
+];
 
 const HomePage: React.FC = () => {
   const [animals, setAnimals] = useState<any[]>([]);
@@ -59,13 +68,17 @@ const HomePage: React.FC = () => {
   };  
 
   return (
-    <div>
+    <body>
+      <header>
+          Koel
+      </header>
       <h1>Welcome to the Main Page</h1>
       <button onClick={fetchData} disabled={loading}>
         {loading ? 'Fetching Data...' : 'Fetch Data'}
       </button>
-      <h2>Leaderboard</h2>
-      <ul><Leaderboard /></ul>
+      <React.StrictMode>
+        <Leaderboard initialLeaderboard={initialLeaderboard} />
+      </React.StrictMode>
       <h2>Animals:</h2>
       <ul>
         {animals.map(animal => (
@@ -84,7 +97,7 @@ const HomePage: React.FC = () => {
         {uploading ? 'Detecting...' : 'Detect'}
       </button>
     </div>
-    </div>
+    </body>
   );
 };
 
