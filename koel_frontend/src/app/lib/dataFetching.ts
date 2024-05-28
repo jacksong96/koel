@@ -1,3 +1,7 @@
+//fetchAnimals -> Get the first x number of animals
+//fetchAnimal-> given a species_name, get the information of the animal 
+
+
 export async function fetchAnimals(): Promise<any[]> {
     try {
       const response = await fetch('http://127.0.0.1:8000/api/animals/');
@@ -8,6 +12,8 @@ export async function fetchAnimals(): Promise<any[]> {
       return [];
     }
   }
+
+
   
   export async function fetchUsers(): Promise<any[]> {
     try {
