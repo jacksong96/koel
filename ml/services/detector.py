@@ -10,7 +10,7 @@ pickle_path=os.path.normpath(base_path+os.sep+'pickle')
 log_path=os.path.normpath(base_path+os.sep+'log')
 
 # Load a model
-model = YOLO("yolov8n.pt")  # pretrained YOLOv8n model
+model = YOLO("bird_model_01.pt")  # pretrained YOLOv8n model
 
 # save pickled model
 pickle_file = os.path.normpath(pickle_path+os.sep+'model.sav')
