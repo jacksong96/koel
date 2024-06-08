@@ -34,11 +34,6 @@ class PredictAudioView(APIView):
             os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
             with open(temp_file_path, 'wb') as f:
                 f.write(audio_file.read())
-
-            print(temp_file_path)
-
-            # load pretrained model
-            model = torch.hub.load('kitzeslab/bioacoustics-model-zoo', 'BirdNET',trust_repo=True)   
             
             # Make predictions
             predictions = MlConfig.model.predict([temp_file_path])
@@ -49,10 +44,6 @@ class PredictAudioView(APIView):
             scores = predict_multi_target_labels(predictions, threshold=0.5) # filter predictions above thresh value
             scores = scores.loc[:, (scores != 0).any(axis=0)] # discard scores which are 0
 
-            # print("nfnrifnri , ", type(scores), scores.columns, scores)
-
-            # csv code
-            # csv_file = BytesIO()
             scores_df = pd.DataFrame(scores)
             scores_df.to_csv('csv_outputs.csv', sep=',')
 
