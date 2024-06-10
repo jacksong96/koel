@@ -1,33 +1,55 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface AudioPlayerProps {
   audioUrl: string;
+  jumpTime: number;
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
+const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, jumpTime}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const audioRef = useRef<HTMLAudioElement| null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // const [jumpTime, setJumpTime] = useState(0);
+
 
   useEffect(() => {
-    return () => {
-      // Clean up the ref when the component unmounts
-      audioRef.current = null;
-    };
+    if (audioRef.current) {
+      console.log('Jumping to:', jumpTime);
+      audioRef.current.currentTime = jumpTime;
+      audioRef.current.play();
+    }
+  }, [jumpTime]);
+
+
+
+
+  useEffect(() => {
+    const audioElement = audioRef.current;
+    if (audioElement) {
+      const handleTimeUpdate = () => {
+        setCurrentTime(audioElement.currentTime);
+      };
+
+      audioElement.addEventListener('timeupdate', handleTimeUpdate);
+      audioElement.addEventListener('ended', () => setIsPlaying(false));
+
+      return () => {
+        audioElement.removeEventListener('timeupdate', handleTimeUpdate);
+      };
+    }
   }, []);
 
   const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current?.pause();
-    } else {
-      audioRef.current?.play();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
-    setIsPlaying(!isPlaying);
   };
 
-  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-    setCurrentTime(e.currentTarget.currentTime);
-  };
 
   return (
     <div className="audio-player">
@@ -38,17 +60,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
         controls
         ref={audioRef}
         src={audioUrl}
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
       ></audio>
 
-      {/* <div>
-        {audioUrl}
-      </div> */}
       <div className="controls">
-        {/* <button onClick={togglePlay}>
+        <button onClick={togglePlay}>
           {isPlaying ? 'Pause' : 'Play'}
-        </button> */}
+        </button>
         <div className="time font-bold">{currentTime.toFixed(1)} seconds</div>
       </div>
     </div>

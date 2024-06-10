@@ -51,3 +51,20 @@
   .container li:last-child {
     border-bottom: none;
   }
+
+  .scrollable-list {
+    max-height: 45vh; /* Set the maximum height */
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+
+  /* WebKit browsers (Chrome, Safari) */
+  .scrollable-list::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  .scrollable-list::-webkit-scrollbar-thumb {
+    background: rgb(217, 228, 210); 
+    border-radius: 10px;
+  }
+
+  

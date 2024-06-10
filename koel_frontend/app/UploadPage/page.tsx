@@ -16,33 +16,49 @@ const UploadPage: React.FC = () => {
   const [fileName, setFileName] = useState("");
   const [loading, setLoading] = useState(false);
   
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[] | null>([]);
   const [uploading, setUploading] = useState(false);
   const [fetchedImg, setFetchedImg] = useState(null);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [animalSpec, setanimalSpec] = useState({});
+  const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null);
+  const [jumpTime, setJumpTime] = useState<number>(0);
 
   // const animalspec  = {"Straw-Headed BulBul":{0:1,1:1,2:0,3:0,4:1,5:1},"Koel":{0:0,1:0,2:0,3:0,4:1,5:0},"Pigeon":{0:1,1:0,2:0,3:0,4:0,5:0}}
 
   const handleFileChange = (event:any) => {
-    const file = event.target.files[0];
-    setSelectedFile(file);
-    console.log(file);
-    setFileName(file.name);
+    // const file = event.target.files[0];
+    // setSelectedFile(file);
+    // console.log(file);
+    // setFileName(file.name);
+    const files = Array.from(event.target.files as FileList);
+    setSelectedFiles(files);
+    console.log(files);
+    const fileNames = files.map(file => file.name).join(', ');
+    console.log(fileNames)
+    setFileName(fileNames);
+    setSelectedFileIndex(0);
   };
+  
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFiles) return;
 
+    // const formData = new FormData();
+    // formData.append('audio', selectedFile);
     const formData = new FormData();
-    formData.append('audio', selectedFile);
-    
+    selectedFiles.forEach(file => {
+      formData.append('audio', file);
+    });
+    console.log(formData)
     // setUploadComplete(true);
 
     try {
       setUploading(true);
       const response = await fetch('http://127.0.0.1:8000/api/predict_audio', {
             method: 'POST',
+            // body: formData,
             body: formData,
       });
   
@@ -103,6 +119,10 @@ const UploadPage: React.FC = () => {
     console.log('Search button clicked');
   };
 
+  const handleDropdownChange = (event:any) => {
+    setSelectedFileIndex(parseInt(event.target.value, 10));
+    console.log(parseInt(event.target.value, 10))
+  };
 
 
 
@@ -114,16 +134,24 @@ const UploadPage: React.FC = () => {
         <div className="">
           <div className="FileExplorer flex items-center">
           <div className="SearchForm">
-            <div className="SearchBar">
-              <p className="text-lg">{fileName}</p>
-              
-
-            </div>
+            <div className="SearchBar " >
+            {selectedFiles.length > 0 ? (
+                    <select className="text-lg" onChange={handleDropdownChange}>
+                      {selectedFiles.map((file, index) => (
+                        <option key={index} value={index}>
+                          {file.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-lg">No file selected</p>
+                  )}
+                </div>
 
             </div>
             <div className="ml-4 flex justify-center items-center">
             <label className="button_search">
-                <input type="file" hidden accept="audio/*" onChange={handleFileChange}/> 
+                <input type="file" hidden accept="audio/*" multiple onChange={handleFileChange}/> 
                 <Image src={SearchIcon} className="search_logo" alt="Hamburger Icon"/>
             </label>
 
@@ -144,16 +172,15 @@ const UploadPage: React.FC = () => {
         </div>
 
         <div className='AudioPlayer'>
+        <div>
+              {selectedFileIndex !== null && selectedFiles[selectedFileIndex] && (
+                <AudioPlayer audioUrl={URL.createObjectURL(selectedFiles[selectedFileIndex])} jumpTime={jumpTime} />
+              )}
+            </div>
+
+
           <div>
-          
-
-          {selectedFile && <AudioPlayer audioUrl={URL.createObjectURL(selectedFile)} />}
-
-          </div>
-
-
-          <div>
-            {uploadComplete && <AniSpecies animalspec={animalSpec} />}
+            {uploadComplete && <AniSpecies animalspec={animalSpec} setJumpTime={setJumpTime} />}
           </div>
         </div>
         </div>
