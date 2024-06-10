@@ -13,10 +13,10 @@ import AniSpecies from '@/app/Components/AniSpecies/AniSpecies';
 
 const UploadPage: React.FC = () => {
   // const audioUrl = '/STRAW-HEADED BULBUL.mp3'; 
-  const [fileName, setFileName] = useState("");
+  const [fileNames, setFileNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
   const [uploading, setUploading] = useState(false);
   const [fetchedImg, setFetchedImg] = useState(null);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -25,17 +25,24 @@ const UploadPage: React.FC = () => {
   // const animalspec  = {"Straw-Headed BulBul":{0:1,1:1,2:0,3:0,4:1,5:1},"Koel":{0:0,1:0,2:0,3:0,4:1,5:0},"Pigeon":{0:1,1:0,2:0,3:0,4:0,5:0}}
 
   const handleFileChange = (event:any) => {
-    const file = event.target.files[0];
-    setSelectedFile(file);
-    console.log(file);
-    setFileName(file.name);
+    if (event.target.files) {
+      const files: File[] = Array.from(event.target.files);
+      setSelectedFiles(files);
+      console.log(files);
+      setFileNames(files.map(file => file.name));
+    }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+
+    // const formData = new FormData();
+    // formData.append('audio', selectedFile);
 
     const formData = new FormData();
-    formData.append('audio', selectedFile);
+    selectedFiles.forEach((file, index) => {
+      formData.append(`audio_${index}`, file);
+    });
     
     // setUploadComplete(true);
 
@@ -48,10 +55,13 @@ const UploadPage: React.FC = () => {
   
       const data = await response.json();
       console.log('response data:', data);
+
+      // to set first scores only for testing?
       setanimalSpec(data.scores)
 
       setUploadComplete(true);
 
+      // what does this do?
       return data;
 
     } catch (error) {
@@ -115,7 +125,7 @@ const UploadPage: React.FC = () => {
           <div className="FileExplorer flex items-center">
           <div className="SearchForm">
             <div className="SearchBar">
-              <p className="text-lg">{fileName}</p>
+              <p className="text-lg">{fileNames}</p>
               
 
             </div>
@@ -123,7 +133,7 @@ const UploadPage: React.FC = () => {
             </div>
             <div className="ml-4 flex justify-center items-center">
             <label className="button_search">
-                <input type="file" hidden accept="audio/*" onChange={handleFileChange}/> 
+                <input type="file" name="files" multiple hidden accept="audio/*" onChange={handleFileChange}/> 
                 <Image src={SearchIcon} className="search_logo" alt="Hamburger Icon"/>
             </label>
 

@@ -23,40 +23,44 @@ class PredictAudioView(APIView):
     
     def post(self,request): 
         '''to be abstracted away'''
-        if 'audio' not in request.FILES:
+        if len(request.FILES) == 0:
             return Response({'error': 'No audio uploaded'}, status=status.HTTP_400_BAD_REQUEST)
         
-        audio_file = request.FILES['audio']  # This is an instance of MIME (in-memory object)
+        # audio_file = request.FILES['audio']  # This is an instance of MIME (in-memory object)
+        audio_files = request.FILES.getlist('files')  # This is an instance of MIME (in-memory object)
+        data = {}
 
-        try: 
-            # Save audio file temporarily
-            temp_file_path = os.path.join(os.getcwd(), '\\tmp', audio_file.name)
-            os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
-            with open(temp_file_path, 'wb') as f:
-                f.write(audio_file.read())
+        for audio_file in audio_files:
+            try: 
+                # Save audio file temporarily
+                temp_file_path = os.path.join(os.getcwd(), '\\tmp', audio_file.name)
+                os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
+                with open(temp_file_path, 'wb') as f:
+                    f.write(audio_file.read())
 
-            # print(temp_file_path)
+                # print(temp_file_path)
 
-            # Load from MLconfig and make predictions
-            predictions = MlConfig.model.predict([temp_file_path])
-            
-            # Clean up temp folder
-            os.remove(temp_file_path)
+                # Load from MLconfig and make predictions
+                predictions = MlConfig.model.predict([temp_file_path])
+                
+                # Clean up temp folder
+                os.remove(temp_file_path)
 
-            scores = predict_multi_target_labels(predictions, threshold=0.5) # filter predictions above thresh value
-            scores = scores.loc[:, (scores != 0).any(axis=0)] # discard scores which are 0
+                scores = predict_multi_target_labels(predictions, threshold=0.5) # filter predictions above thresh value
+                scores = scores.loc[:, (scores != 0).any(axis=0)] # discard scores which are 0
 
-            # print("nfnrifnri , ", type(scores), scores.columns, scores)
+                # print("nfnrifnri , ", type(scores), scores.columns, scores)
 
-            # csv code
-            # csv_file = BytesIO()
-            scores_df = pd.DataFrame(scores)
-            scores_df.to_csv('csv_outputs.csv', sep=',')
+                # csv code
+                # csv_file = BytesIO()
+                scores_df = pd.DataFrame(scores)
+                scores_df.to_csv(f'{audio_file.name}_csv_outputs.csv', sep=',')
 
-            data = {'scores': scores}
+                file_data = {'scores': scores}
+                data[f'{audio_file.name}'] = file_data
 
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # return Response(data)
         return Response(data)
